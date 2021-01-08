@@ -1,27 +1,21 @@
 import React, {createContext, useReducer, useEffect } from 'react';
 import {AppReducer} from './AppReducer'
 
-const localStorageTransactions = JSON.parse(
-  localStorage.getItem('transactions')
-);
-
-
-//Initial Global State
-const initialState = {
-  transactions: localStorageTransactions    
-}
 
 // Create Context
-export const GlobalContext = createContext(initialState);
+export const GlobalContext = createContext();
 
 
 // Create Provider component for access to Globalstate for all components
 export const GlobalProvider = ({ children }) => {
-  const [state, dispatch ] = useReducer(AppReducer, initialState);
+  const [state, dispatch ] = useReducer(AppReducer, [], () =>{
+    const localData = sessionStorage.getItem('transactions');
+    return localData ? JSON.parse(localData): [];
+  });
 
   //useEffect
   useEffect(() => {
-    localStorage.setItem('transactions', JSON.stringify(state.transactions))
+    sessionStorage.setItem('transactions', JSON.stringify(state))
 
   }, [state]);
 
@@ -41,7 +35,7 @@ export const GlobalProvider = ({ children }) => {
   }
 
   return (
-  <GlobalContext.Provider value= {{ transactions: state.transactions, deleteTransaction, addTransaction}}>
+  <GlobalContext.Provider value= {{ transactions: state, deleteTransaction, addTransaction}}>
     { children }
   </GlobalContext.Provider>
   );
